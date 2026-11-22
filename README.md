@@ -1,6 +1,18 @@
 # Monitor de Filiais
 
+> **Demonstração:** em breve
+
 > **Status: em desenvolvimento.** O código entra aos poucos; abaixo está o planejamento do projeto.
+
+## API: primeira etapa
+
+A API aceita batimentos autenticados, persiste os dados e abre ou fecha incidentes. A interface, o Telegram, os resumos de retenção e a disponibilidade mensal ainda estão em desenvolvimento.
+
+Requisitos: Node.js 24 e PostgreSQL. Copie `.env.example` para `.env` e configure `DATABASE_URL`. Exporte essas variáveis no ambiente antes de iniciar: `npm install`, seguido de `npm start`. A inicialização cria as tabelas. Esta versão suporta **uma instância da API**, com uma conexão ao banco; não execute múltiplas réplicas.
+
+Para cadastrar uma filial, defina `FILIAL_ID`, `FILIAL_NOME` e `FILIAL_TOKEN` no ambiente e execute `npm run cadastrar`. Gere um token aleatório com pelo menos 32 caracteres e mantenha-o fora do repositório. O banco guarda somente seu hash. A rota `POST /filiais/{id}/batimentos` recebe `Authorization: Bearer <token>` e JSON com `cpu`, `memoria`, `disco` (percentuais de 0 a 100), `latencia` (ms) e `servicos` (objeto de nomes para booleanos). Um batimento válido retorna 202; token inválido retorna 401 e é registrado sem o token. Campos inválidos retornam 422. O servidor usa o horário de recebimento e verifica filiais a cada 15 segundos.
+
+Execute `npm test` para testes com banco PGlite e `npm run typecheck` para tipos. PostgreSQL real ainda precisa ser verificado localmente. Use HTTPS e restrinja acesso à API em uma implantação; esta etapa não implementa autenticação para consulta ou limitação distribuída de requisições.
 
 ## O que é
 
