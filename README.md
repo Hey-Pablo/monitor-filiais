@@ -33,7 +33,14 @@ monitor-filiais/
 ├─ agente/
 │  ├─ Enviar-Batimento.ps1      # coleta e envia a cada 60 s
 │  ├─ Instalar-Tarefa.ps1       # cria a tarefa agendada
+│  ├─ MonitorFilial.psm1        # módulo com funções puras
+│  ├─ tests/
+│  │  └─ MonitorFilial.Tests.ps1
+│  ├─ PSScriptAnalyzerSettings.psd1
 │  └─ config.exemplo.json
+├─ docs/
+│  ├─ contrato-batimento.md
+│  └─ contrato-batimento.schema.json
 ├─ api/src/
 │  ├─ ingestao/                 # recebe batimentos com token da filial
 │  ├─ regras/                   # avalia e abre ou fecha incidentes
@@ -47,11 +54,11 @@ monitor-filiais/
 
 ## Plano
 
-1. Contrato do batimento em JSON: filial, horário, CPU, memória, disco livre, serviços e latência.
+1. ✅ Contrato do batimento em JSON: filial, horário, CPU, memória, disco livre, serviços e latência.
 2. Modelo: filiais, batimentos, incidentes e notificações.
 3. Ingestão com token por filial e validação do corpo.
-4. Agente PowerShell e instalação por tarefa agendada.
-5. Simulador, para testar sem 50 máquinas.
+4. ✅ Agente PowerShell e instalação por tarefa agendada.
+5. ✅ Simulador, para testar sem 50 máquinas.
 6. Regras: sem batimento por 3 minutos (fora do ar), disco livre abaixo de 10% e serviço monitorado parado. Cada regra abre e fecha incidente.
 7. Notificação única na abertura e outra na normalização.
 8. Painel em tempo real: grade com cores, detalhe da filial e linha do tempo de incidentes.
@@ -68,6 +75,8 @@ monitor-filiais/
 ## Prazo
 
 4 a 5 semanas.
+
+> **Demonstração:** em breve
 
 ## Autor
 

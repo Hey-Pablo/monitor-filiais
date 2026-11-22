@@ -1,0 +1,23 @@
+{
+  "name": "monitor-filiais-simulador",
+  "version": "1.0.0",
+  "description": "Simulador de 50 filiais para teste do Monitor de Filiais",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "test": "jest"
+  },
+  "keywords": ["monitor", "filiais", "simulator", "heartbeat"],
+  "author": "Pablo Dilio",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}

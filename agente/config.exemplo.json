@@ -1,0 +1,18 @@
+{
+  "apiBaseUrl": "https://api.exemplo.com",
+  "filialId": "filial-sp-01",
+  "token": "coloque-seu-token-aqui",
+  "intervaloSegundos": 60,
+  "servicosMonitorados": [
+    "spooler",
+    "wuauserv",
+    "w32time",
+    "eventlog",
+    "dhcp",
+    "dnscache"
+  ],
+  "limiteCpuCritico": 90,
+  "limiteMemoriaCritico": 90,
+  "limiteDiscoCritico": 10,
+  "timeoutRequisicaoSegundos": 10
+}
