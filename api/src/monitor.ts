@@ -38,7 +38,7 @@ export function criarMonitor(db: Banco, relogio = () => new Date()) {
       const esperado = Buffer.from(filial?.token_hash ?? '0'.repeat(64), 'hex');
       const recebido = Buffer.from(hashToken(token), 'hex');
       if (esperado.length !== recebido.length || !timingSafeEqual(esperado, recebido) || !filial) {
-        await db.query('INSERT INTO acessos_invalidos (filial_id) VALUES ($1)', [id]);
+        await db.query("INSERT INTO acessos_invalidos (filial_id) SELECT $1 WHERE NOT EXISTS (SELECT 1 FROM acessos_invalidos WHERE filial_id IS NOT DISTINCT FROM $1 AND ocorrido_em >= now() - interval '1 hour')", [filial ? id : null]);
         return false;
       }
       const agora = relogio();
