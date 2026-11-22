@@ -6,7 +6,7 @@
 
 ## API: primeira etapa
 
-A API aceita batimentos autenticados, persiste os dados e abre ou fecha incidentes. A interface ainda está em desenvolvimento.
+A API aceita batimentos autenticados, persiste os dados e abre ou fecha incidentes. O painel React mostra filiais, métricas e incidentes em tempo real.
 
 Requisitos: Node.js 24 e PostgreSQL. Copie `.env.example` para `.env` e configure `DATABASE_URL`. Exporte essas variáveis no ambiente antes de iniciar: `npm install`, seguido de `npm start`. A inicialização cria as tabelas. Esta versão suporta **uma instância da API**, não execute múltiplas réplicas.
 
@@ -25,6 +25,12 @@ Execute `npm test` para testes com banco PGlite e `npm run typecheck` para tipos
 O Telegram é opcional. Crie um bot com [BotFather](https://core.telegram.org/bots/features#botfather), obtenha seu token e o identificador do chat, e configure `TELEGRAM_BOT_TOKEN` e `TELEGRAM_CHAT_ID` no ambiente do servidor. Nunca inclua valores reais no repositório. Sem ambas as variáveis, os eventos ficam pendentes; fornecer apenas uma impede a inicialização.
 
 Cada abertura e normalização cria um evento em `notificacoes` na mesma transação do incidente. O processador consulta a fila a cada 15 segundos; a mensagem de normalização inclui a duração. Para evitar duplicações em interrupções e timeouts ambíguos, registra a tentativa antes da chamada e não repete automaticamente. Portanto, uma falha ou queda depois da reserva pode deixar um alerta sem entrega. Consulte `tentada_em`, `enviada_em` e `falhou` na tabela e investigue esses casos antes de qualquer reenvio manual. A API permanece limitada a uma instância.
+
+## Painel
+
+Com a API em execução na porta 3000, execute `npm run painel` e abra o endereço informado pelo Vite. O proxy de desenvolvimento encaminha `/api` à API sem CORS. A grade mostra estados por cor e texto; selecione uma filial para métricas, disponibilidade mensal e até 100 incidentes recentes. Se a conexão SSE cair, o navegador tenta reconectar e o painel informa o estado da conexão.
+
+Para gerar arquivos estáticos, execute `npm run build:painel`. Em produção, publique `painel/dist` e encaminhe `/api` para a API na mesma origem, removendo o prefixo, com suporte a conexões SSE sem buffering. A API não autentica consultas: restrinja acesso à rede ou adicione uma camada de autenticação antes de expô-la. Execute `npm run typecheck:painel` para verificar tipos.
 
 ## O que é
 
