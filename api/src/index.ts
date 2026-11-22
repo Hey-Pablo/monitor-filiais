@@ -4,6 +4,7 @@ import { criarMonitor } from './monitor';
 import { criarApp } from './app';
 import { reter } from './retencao';
 import { enviarPendentes, telegram } from './notificacoes';
+import { criarEventos } from './eventos';
 
 async function iniciar() {
   if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL é obrigatória');
@@ -12,7 +13,8 @@ async function iniciar() {
   const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 });
   await pool.query(await readFile('api/schema.sql', 'utf8'));
   const monitor = criarMonitor(pool);
-  const verificar = async () => { try { await monitor.verificar(); } catch { console.error('Falha ao verificar incidentes'); } };
+  const eventos = criarEventos();
+  const verificar = async () => { try { await monitor.verificar(); eventos.publicar(); } catch { console.error('Falha ao verificar incidentes'); } };
   await verificar();
   setInterval(verificar, 15_000);
   const manutencao = new Pool({ connectionString: process.env.DATABASE_URL, max: 1 });
@@ -44,6 +46,6 @@ async function iniciar() {
     setInterval(despachar, 15_000);
   }
   const consultas = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
-  criarApp(monitor, consultas).listen(Number(process.env.PORT ?? 3000));
+  criarApp(monitor, consultas, eventos).listen(Number(process.env.PORT ?? 3000));
 }
 iniciar().catch(() => { console.error('Falha ao iniciar API'); process.exitCode = 1; });
