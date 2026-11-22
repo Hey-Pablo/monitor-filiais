@@ -42,3 +42,5 @@ CREATE TABLE IF NOT EXISTS resumo_horario (
   disco_minimo numeric,
   PRIMARY KEY (filial_id, hora)
 );
+ALTER TABLE notificacoes ADD COLUMN IF NOT EXISTS tentada_em timestamptz;
+ALTER TABLE notificacoes ADD COLUMN IF NOT EXISTS falhou boolean NOT NULL DEFAULT false;

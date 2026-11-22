@@ -9,10 +9,14 @@ export function criarMonitor(db: Banco, relogio = () => new Date()) {
   async function reconciliar(id: string, ativos: string[], agora: Date) {
     const abertos = (await db.query('SELECT id, tipo FROM incidentes WHERE filial_id = $1 AND fechado_em IS NULL', [id])).rows;
     for (const tipo of ativos) {
-      await db.query('INSERT INTO incidentes (filial_id,tipo,aberto_em) VALUES ($1,$2,$3) ON CONFLICT (filial_id,tipo) WHERE fechado_em IS NULL DO NOTHING', [id,tipo,agora]);
+      const novo = await db.query('INSERT INTO incidentes (filial_id,tipo,aberto_em) VALUES ($1,$2,$3) ON CONFLICT (filial_id,tipo) WHERE fechado_em IS NULL DO NOTHING RETURNING id', [id,tipo,agora]);
+      if (novo.rows[0]) await db.query("INSERT INTO notificacoes (incidente_id,evento) VALUES ($1,'abertura')", [novo.rows[0].id]);
     }
     for (const incidente of abertos) {
-      if (!ativos.includes(incidente.tipo)) await db.query('UPDATE incidentes SET fechado_em=$1 WHERE id=$2 AND fechado_em IS NULL', [agora, incidente.id]);
+      if (!ativos.includes(incidente.tipo)) {
+        const fechado = await db.query('UPDATE incidentes SET fechado_em=$1 WHERE id=$2 AND fechado_em IS NULL RETURNING id', [agora, incidente.id]);
+        if (fechado.rows[0]) await db.query("INSERT INTO notificacoes (incidente_id,evento) VALUES ($1,'normalizacao')", [incidente.id]);
+      }
     }
   }
   let fila: Promise<unknown> = Promise.resolve();
