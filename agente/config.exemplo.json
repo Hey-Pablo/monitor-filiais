@@ -1,7 +1,6 @@
 {
   "apiBaseUrl": "https://api.exemplo.com",
   "filialId": "filial-sp-01",
-  "token": "coloque-seu-token-aqui",
   "intervaloSegundos": 60,
   "servicosMonitorados": [
     "spooler",

@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
 Coleta métricas do sistema e envia batimento para a API central.
 Compatível com PowerShell 5.1 (Windows 10/11) e PowerShell 7+.
@@ -61,7 +61,8 @@ function Enviar-Batimento {
         [int]$TimeoutSegundos = 10
     )
 
-    $url = "$ApiBaseUrl/api/ingestao/batimento"
+    if ($FilialId -notmatch '^[a-zA-Z0-9_-]{1,80}$') { throw 'Identificador de filial inválido.' }
+    $url = "$($ApiBaseUrl.TrimEnd('/'))/filiais/$FilialId/batimentos"
     $payload = ConverterParaJsonContrato -FilialId $FilialId -Cpu $Cpu -Memoria $Memoria -DiscoLivrePercentual $DiscoLivrePercentual -Servicos $Servicos -LatenciaMs $LatenciaMs
 
     $headers = @{
@@ -74,13 +75,13 @@ function Enviar-Batimento {
         Invoke-RestMethod -Uri $url -Method Post -Headers $headers -Body $payload -TimeoutSec $TimeoutSegundos -ErrorAction Stop | Out-Null
         $fim = Get-Date
         $latencia = [math]::Round(($fim - $inicio).TotalMilliseconds)
-        Write-Output "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] Batimento enviado - Status: OK - Latência: ${latencia}ms"
+        Write-Verbose "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] Batimento enviado - Status: OK - Latência: ${latencia}ms"
         return $true
     } catch {
         $fim = Get-Date
         $latencia = [math]::Round(($fim - $inicio).TotalMilliseconds)
         $statusCode = if ($_.Exception.Response) { $_.Exception.Response.StatusCode.value__ } else { 'SEM_RESPOSTA' }
-        Write-Warning "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] Falha ao enviar batimento - Status: $statusCode - Latência: ${latencia}ms - Erro: $($_.Exception.Message)"
+        Write-Warning "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] Falha ao enviar batimento - Status: $statusCode - Latência: ${latencia}ms"
         return $false
     }
 }
@@ -113,13 +114,13 @@ try {
 
 $apiBaseUrl            = $config.apiBaseUrl
 $filialId              = $config.filialId
-$token                 = $config.token
+$token                 = $env:FILIAL_TOKEN
 $intervaloSegundos     = if ($config.intervaloSegundos) { $config.intervaloSegundos } else { 60 }
 $servicosMonitorados   = if ($config.servicosMonitorados) { $config.servicosMonitorados } else { @() }
 $timeoutRequisicao     = if ($config.timeoutRequisicaoSegundos) { $config.timeoutRequisicaoSegundos } else { 10 }
 
 if (-not $apiBaseUrl -or -not $filialId -or -not $token) {
-    Write-Error "Configuração incompleta: apiBaseUrl, filialId e token são obrigatórios."
+    Write-Error "Configuração incompleta: apiBaseUrl e filialId são obrigatórios; defina FILIAL_TOKEN no ambiente."
     exit 1
 }
 
@@ -132,7 +133,8 @@ Write-Output ""
 
 if ($UmaVez) {
     $metricas = ColetarMetricas -ServicosMonitorados $servicosMonitorados
-    Enviar-Batimento -ApiBaseUrl $apiBaseUrl -FilialId $filialId -Token $token -Cpu $metricas.Cpu -Memoria $metricas.Memoria -DiscoLivrePercentual $metricas.DiscoLivrePercentual -Servicos $metricas.Servicos -TimeoutSegundos $timeoutRequisicao
+    $enviado = Enviar-Batimento -ApiBaseUrl $apiBaseUrl -FilialId $filialId -Token $token -Cpu $metricas.Cpu -Memoria $metricas.Memoria -DiscoLivrePercentual $metricas.DiscoLivrePercentual -Servicos $metricas.Servicos -TimeoutSegundos $timeoutRequisicao
+    if (-not $enviado) { exit 1 }
     exit 0
 }
 

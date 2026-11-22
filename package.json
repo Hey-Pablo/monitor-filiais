@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit --module commonjs --target es2022 --esModuleInterop --skipLibCheck api/src/*.ts",
     "painel": "vite --config painel/vite.config.ts",
     "build:painel": "vite build --config painel/vite.config.ts",
-    "typecheck:painel": "tsc --noEmit --jsx react-jsx --module esnext --moduleResolution bundler --target es2022 --esModuleInterop --skipLibCheck --lib es2022,dom painel/src/*.ts painel/src/*.tsx"
+    "typecheck:painel": "tsc --noEmit --jsx react-jsx --module esnext --moduleResolution bundler --target es2022 --esModuleInterop --skipLibCheck --lib es2022,dom painel/src/*.ts painel/src/*.tsx",
+    "simular": "tsx simulador/src/index.ts",
+    "cadastrar:simulador": "tsx simulador/src/cadastrar.ts"
   },
   "repository": {
     "type": "git",

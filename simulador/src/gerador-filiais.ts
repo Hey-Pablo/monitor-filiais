@@ -1,3 +1,4 @@
+import { createHmac } from 'node:crypto';
 /**
  * Gera 50 filiais fictícias com configurações variadas e falhas programadas.
  */
@@ -23,10 +24,9 @@ function gerarIdFilial(indice: number): string {
   return `filial-${cidade}-${num}`;
 }
 
-function gerarToken(filialId: string): string {
-  // Token fictício para demonstração (em produção viria da API)
-  const hash = filialId.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-  return `tk_${filialId}_${hash.toString(16).padStart(8, '0')}`;
+export function gerarToken(filialId: string, seed: string): string {
+  if (seed.length < 32) throw new Error('SIMULADOR_SEED deve ter pelo menos 32 caracteres');
+  return createHmac('sha256', seed).update(filialId).digest('hex');
 }
 
 function gerarFalhasAleatorias(filialId: string): FalhaProgramada[] {
@@ -53,10 +53,10 @@ function gerarFalhasAleatorias(filialId: string): FalhaProgramada[] {
 
     switch (tipoFalha) {
       case 'cpu':
-        falha.cpuValor = Math.floor(Math.random() * 20) + 85; // 85-100%
+        falha.cpuValor = Math.floor(Math.random() * 16) + 85; // 85-100%
         break;
       case 'memoria':
-        falha.memoriaValor = Math.floor(Math.random() * 20) + 85; // 85-100%
+        falha.memoriaValor = Math.floor(Math.random() * 16) + 85; // 85-100%
         break;
       case 'disco':
         falha.discoValor = Math.floor(Math.random() * 8) + 2; // 2-10% livre
@@ -84,7 +84,7 @@ function gerarMetricasBase(): { cpu: number; memoria: number; discoLivre: number
   };
 }
 
-export function gerarConfigSimulador(): SimuladorConfig {
+export function gerarConfigSimulador(seed = process.env.SIMULADOR_SEED || ''): SimuladorConfig {
   const filiais: FilialConfig[] = [];
 
   for (let i = 0; i < 50; i++) {
@@ -95,7 +95,7 @@ export function gerarConfigSimulador(): SimuladorConfig {
 
     filiais.push({
       id,
-      token: gerarToken(id),
+      token: gerarToken(id, seed),
       nome: `Filial ${id.split('-')[1].toUpperCase()} ${id.split('-')[2]}`,
       falhas: gerarFalhasAleatorias(id)
     });

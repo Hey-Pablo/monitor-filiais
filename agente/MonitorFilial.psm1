@@ -1,4 +1,4 @@
-# MonitorFilial.psm1
+﻿# MonitorFilial.psm1
 # Módulo com funções puras para o agente de monitoramento de filiais.
 # Reutiliza lógica do kit-suporte-powershell (Get-PercentualLivre, Get-ClassificacaoDisco, ConvertTo-TamanhoLegivel).
 # Compatível com PowerShell 5.1 e 7+.
@@ -220,16 +220,14 @@ function ConverterParaJsonContrato {
         [Parameter(Mandatory)][object[]]$Servicos,
         [double]$LatenciaMs = 0
     )
+    $estados = @{}
+    foreach ($servico in $Servicos) { $estados[$servico.nome] = ($servico.status -eq 'running') }
     $payload = [ordered]@{
-        filialId             = $FilialId
-        timestamp            = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.fffZ')
-        cpu                  = [math]::Round($Cpu, 1)
-        memoria              = [math]::Round($Memoria, 1)
-        discoLivrePercentual = [math]::Round($DiscoLivrePercentual, 1)
-        servicos             = $Servicos
-    }
-    if ($LatenciaMs -gt 0) {
-        $payload.latenciaMs = [math]::Round($LatenciaMs)
+        cpu = [math]::Round($Cpu, 1)
+        memoria = [math]::Round($Memoria, 1)
+        disco = [math]::Round($DiscoLivrePercentual, 1)
+        servicos = $estados
+        latencia = [math]::Round($LatenciaMs)
     }
     return $payload | ConvertTo-Json -Depth 5 -Compress
 }

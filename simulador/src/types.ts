@@ -7,13 +7,11 @@ export interface ServicoStatus {
 }
 
 export interface BatimentoPayload {
-  filialId: string;
-  timestamp: string; // ISO 8601 UTC
-  cpu: number; // 0-100
-  memoria: number; // 0-100
-  discoLivrePercentual: number; // 0-100
-  servicos: ServicoStatus[];
-  latenciaMs?: number;
+  cpu: number;
+  memoria: number;
+  disco: number;
+  servicos: Record<string, boolean>;
+  latencia: number;
 }
 
 export interface FilialConfig {

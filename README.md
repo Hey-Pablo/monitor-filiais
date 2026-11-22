@@ -2,7 +2,7 @@
 
 > **Demonstração:** em breve
 
-> **Status: em desenvolvimento.** API e painel estão implementados. Agente e simulador precisam de adaptação ao contrato da API atual; Docker e PostgreSQL precisam de testes no PC.
+> **Status: em desenvolvimento.** API, painel, agente e simulador estão implementados. Docker, PostgreSQL e Windows precisam de testes no PC.
 
 ## API: primeira etapa
 
@@ -38,6 +38,19 @@ docker compose --env-file .env -f infra/docker-compose.yml up --build
 
 Acesse `http://localhost:8080`. O painel e `/api` usam a mesma origem, com SSE sem buffering. O banco e a API ficam na rede interna; a porta do painel é vinculada a `127.0.0.1`. Para parar, use `docker compose --env-file .env -f infra/docker-compose.yml down`. O volume do PostgreSQL é preservado. A configuração é para uso local: não exponha a API sem autenticação e HTTPS. O Compose e o PostgreSQL real ainda precisam ser testados no PC.
 
+## Agente Windows e simulador
+
+Copie `agente/config.exemplo.json` para `agente/config.json`, ajuste a URL e o identificador cadastrado e defina `FILIAL_TOKEN` no ambiente da conta que executa o agente. Execute `agente/Enviar-Batimento.ps1 -UmaVez`. A tarefa instalada usa SYSTEM: configure a variável para essa conta por um mecanismo seguro da máquina e reinicie o serviço que inicia a tarefa. Teste a configuração no Windows antes de usar. Nunca coloque o token no JSON ou no repositório. Serviços não iniciados, pausados ou desconhecidos são reportados como `false`; a latência enviada é zero quando não há medição.
+
+Para o simulador, gere uma seed aleatória privada de pelo menos 32 caracteres e mantenha-a no ambiente como `SIMULADOR_SEED`. Cada token é derivado dessa seed e do ID; o banco armazena apenas seu hash. Não use seed de exemplo para dados reais. Com o Compose já iniciado e a seed exportada no terminal, execute:
+
+```sh
+docker compose --env-file .env -f infra/docker-compose.yml exec -e SIMULADOR_SEED api npm run cadastrar:simulador
+docker compose --env-file .env -f infra/docker-compose.yml exec -e SIMULADOR_SEED api npm run simular
+```
+
+O cadastro é transacional e não altera filial existente; uma colisão com token diferente cancela tudo. Preserve a seed para reiniciar a simulação. Interrompa com Ctrl+C. Fora do Docker, defina também `DATABASE_URL`, inicie a API e execute os mesmos scripts com `npm run`. `API_BASE_URL` altera o endereço da API para o simulador. Os envios simulados usam latência zero; falhas programadas são fictícias. Os comandos com Docker ainda precisam de teste no PC.
+
 ## Painel
 
 Com a API em execução na porta 3000, execute `npm run painel` e abra o endereço informado pelo Vite. O proxy de desenvolvimento encaminha `/api` à API sem CORS. A grade mostra estados por cor e texto; selecione uma filial para métricas, disponibilidade mensal e até 100 incidentes recentes. Se a conexão SSE cair, o navegador tenta reconectar e o painel informa o estado da conexão.
@@ -65,7 +78,7 @@ monitor-filiais/
 ├─ docs/               # contrato original do batimento
 ├─ infra/              # Compose, imagens e proxy
 ├─ painel/             # interface React
-├─ simulador/          # gerador de filiais fictícias (adaptação pendente)
+├─ simulador/          # gerador de filiais fictícias
 ├─ .env.example
 └─ README.md
 ```
@@ -75,8 +88,8 @@ monitor-filiais/
 1. ✅ Contrato do batimento em JSON: filial, horário, CPU, memória, disco livre, serviços e latência.
 2. ✅ Modelo: filiais, batimentos, incidentes e notificações.
 3. Ingestão com token por filial e validação do corpo.
-4. Agente PowerShell e instalação por tarefa agendada: integração com a API atual está pendente.
-5. Simulador: gerador existe; integração com o contrato atual está pendente.
+4. Agente PowerShell e instalação por tarefa agendada; validação no Windows pendente.
+5. Simulador de 50 filiais fictícias; integração completa com PostgreSQL pendente.
 6. ✅ Regras: sem batimento por 3 minutos (fora do ar), disco livre abaixo de 10% e serviço monitorado parado. Cada regra abre e fecha incidente.
 7. Notificação única na abertura e outra na normalização.
 8. ✅ Painel em tempo real: grade com cores, detalhe da filial e linha do tempo de incidentes.
@@ -95,7 +108,7 @@ monitor-filiais/
 Pablo Dilio · [Portfólio](https://hey-pablo.github.io/pablo-dilio-portfolio/) · [LinkedIn](https://www.linkedin.com/in/pablo-dilio-4063991b2)
 ## O que o Pablo precisa testar no PC
 
-- Após adaptação ao contrato atual, testar agente no Windows 10/11 com PowerShell 5.1: `Enviar-Batimento.ps1` real e `Instalar-Tarefa.ps1` (`Register-ScheduledTask`), com serviços reais.
+- Testar agente no Windows 10/11 com PowerShell 5.1: `Enviar-Batimento.ps1` real e `Instalar-Tarefa.ps1` (`Register-ScheduledTask`), com serviços reais.
 - API contra PostgreSQL real (os testes usam PGlite).
-- Simulador: a versão atual usa outro contrato e ainda precisa ser adaptada à API antes do teste integrado.
+- Simulador: cadastrar 50 filiais, observar envios e incidentes, e verificar recusa de token inválido com PostgreSQL real.
 - Compose: build, inicialização, persistência após reinício, SSE, painel e integração com Telegram de teste.

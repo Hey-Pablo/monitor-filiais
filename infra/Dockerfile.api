@@ -3,6 +3,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts
 COPY api ./api
+COPY simulador ./simulador
 USER node
 EXPOSE 3000
 CMD ["npm", "start"]
