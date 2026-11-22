@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
 Testes Pester para o módulo MonitorFilial.psm1.
 Testa as funções puras (sem dependência do Windows) e valida a lógica de coleta.
@@ -83,45 +83,16 @@ Describe 'MonitorFilial - Funções puras' {
     }
 
     Context 'ConverterParaJsonContrato' {
-        It 'Gera JSON válido com todos os campos obrigatórios' {
-            $servicos = @(
-                [pscustomobject]@{ nome = 'spooler'; status = 'running' },
-                [pscustomobject]@{ nome = 'wuauserv'; status = 'stopped' }
-            )
-            $json = ConverterParaJsonContrato -FilialId 'filial-01' -Cpu 12.5 -Memoria 45.2 -DiscoLivrePercentual 68.7 -Servicos $servicos
-            $obj = $json | ConvertFrom-Json
-
-            $obj.filialId | Should -Be 'filial-01'
+        It 'gera o corpo aceito pela API e traduz estados dos serviços' {
+            $servicos = @([pscustomobject]@{ nome = 'spooler'; status = 'running' }, [pscustomobject]@{ nome = 'wuauserv'; status = 'stopped' })
+            $obj = ConverterParaJsonContrato -FilialId 'filial-01' -Cpu 12.5 -Memoria 45.2 -DiscoLivrePercentual 68.7 -Servicos $servicos | ConvertFrom-Json
             $obj.cpu | Should -Be 12.5
             $obj.memoria | Should -Be 45.2
-            $obj.discoLivrePercentual | Should -Be 68.7
-            $obj.servicos.Count | Should -Be 2
-            $obj.servicos[0].nome | Should -Be 'spooler'
-            $obj.servicos[0].status | Should -Be 'running'
-            $obj.timestamp | Should -Not -BeNullOrEmpty
-        }
-
-        It 'Inclui latenciaMs quando > 0' {
-            $servicos = @([pscustomobject]@{ nome = 'spooler'; status = 'running' })
-            $json = ConverterParaJsonContrato -FilialId 'filial-01' -Cpu 10 -Memoria 50 -DiscoLivrePercentual 70 -Servicos $servicos -LatenciaMs 42
-            $obj = $json | ConvertFrom-Json
-            $obj.latenciaMs | Should -Be 42
-        }
-
-        It 'Não inclui latenciaMs quando 0 ou omitido' {
-            $servicos = @([pscustomobject]@{ nome = 'spooler'; status = 'running' })
-            $json = ConverterParaJsonContrato -FilialId 'filial-01' -Cpu 10 -Memoria 50 -DiscoLivrePercentual 70 -Servicos $servicos
-            $obj = $json | ConvertFrom-Json
-            $obj.PSObject.Properties.Match('latenciaMs') | Should -Be $null
-        }
-
-        It 'Arredonda valores numéricos para 1 casa decimal' {
-            $servicos = @([pscustomobject]@{ nome = 'spooler'; status = 'running' })
-            $json = ConverterParaJsonContrato -FilialId 'filial-01' -Cpu 12.567 -Memoria 45.234 -DiscoLivrePercentual 68.789 -Servicos $servicos
-            $obj = $json | ConvertFrom-Json
-            $obj.cpu | Should -Be 12.6
-            $obj.memoria | Should -Be 45.2
-            $obj.discoLivrePercentual | Should -Be 68.8
+            $obj.disco | Should -Be 68.7
+            $obj.servicos.spooler | Should -Be $true
+            $obj.servicos.wuauserv | Should -Be $false
+            $obj.latencia | Should -Be 0
+            @($obj.PSObject.Properties).Count | Should -Be 5
         }
     }
 }

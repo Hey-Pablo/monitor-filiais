@@ -2,7 +2,6 @@
  * Simulador de 50 filiais para o Monitor de Filiais.
  * Gera batimentos fictícios com falhas programadas e envia para a API.
  */
-import axios from 'axios';
 import { SimuladorConfig, BatimentoPayload } from './types';
 import { gerarConfigSimulador, obterMetricasFilial } from './gerador-filiais';
 
@@ -30,33 +29,17 @@ class Logger {
 
 const logger = new Logger();
 
-async function enviarBatimento(
-  apiBaseUrl: string,
-  filialId: string,
-  token: string,
-  payload: BatimentoPayload
-): Promise<boolean> {
-  const url = `${apiBaseUrl}/api/ingestao/batimento`;
-  const inicio = Date.now();
-
+export async function enviarBatimento(apiBaseUrl: string, filialId: string, token: string, payload: BatimentoPayload): Promise<boolean> {
+  if (!/^[a-zA-Z0-9_-]{1,80}$/.test(filialId)) throw new Error('Identificador inválido');
   try {
-    await axios.post(url, payload, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      timeout: 10000,
-      validateStatus: (status) => status < 500 // Trata 4xx como resposta válida para log
+    const response = await fetch(`${apiBaseUrl.replace(/\/$/, '')}/filiais/${filialId}/batimentos`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload), signal: AbortSignal.timeout(10000)
     });
-
-    const latencia = Date.now() - inicio;
-    logger.debug(`[${filialId}] Batimento enviado - Status: 200 - Latência: ${latencia}ms`);
-    return true;
-  } catch (error: any) {
-    const latencia = Date.now() - inicio;
-    const status = error.response?.status || 'SEM_RESPOSTA';
-    const msg = error.response?.data?.message || error.message;
-    logger.warn(`[${filialId}] Falha ao enviar batimento - Status: ${status} - Latência: ${latencia}ms - ${msg}`);
+    if (!response.ok) logger.warn(`[${filialId}] Falha ao enviar batimento - Status: ${response.status}`);
+    return response.ok;
+  } catch {
+    logger.warn(`[${filialId}] Falha ao enviar batimento - sem resposta`);
     return false;
   }
 }
@@ -75,13 +58,9 @@ async function executarCiclo(config: SimuladorConfig, tempoDecorridoMs: number):
     }
 
     const payload: BatimentoPayload = {
-      filialId: filial.id,
-      timestamp: new Date().toISOString(),
-      cpu,
-      memoria,
-      discoLivrePercentual: discoLivre,
-      servicos: servicos.map(s => ({ nome: s.nome, status: s.status as 'running' | 'stopped' | 'paused' | 'unknown' })),
-      latenciaMs: 0 // será preenchido pela função de envio
+      cpu, memoria, disco: discoLivre,
+      servicos: Object.fromEntries(servicos.map(s => [s.nome, s.status === 'running'])),
+      latencia: 0
     };
 
     await enviarBatimento(config.apiBaseUrl, filial.id, filial.token, payload);
@@ -164,4 +143,4 @@ async function main() {
   logger.info('Simulador finalizado.');
 }
 
-main();
+if (require.main === module) main().catch(() => { console.error('Falha ao iniciar simulador'); process.exitCode = 1; });
