@@ -1,0 +1,28 @@
+{
+  "apiBaseUrl": "http://localhost:3000",
+  "intervaloSegundos": 60,
+  "duracaoMinutos": 60,
+  "logLevel": "info",
+  "filiais": [
+    {
+      "id": "filial-sp-01",
+      "token": "coloque-token-real-aqui",
+      "nome": "Filial São Paulo 01",
+      "falhas": [
+        {
+          "tipo": "cpu",
+          "inicio": "2025-06-15T14:10:00.000Z",
+          "fim": "2025-06-15T14:25:00.000Z",
+          "cpuValor": 95
+        },
+        {
+          "tipo": "disco",
+          "inicio": "2025-06-15T14:35:00.000Z",
+          "fim": "2025-06-15T14:45:00.000Z",
+          "discoValor": 5
+        }
+      ]
+    }
+  ],
+  "servicosPadrao": ["spooler", "wuauserv", "w32time", "eventlog", "dhcp", "dnscache"]
+}
