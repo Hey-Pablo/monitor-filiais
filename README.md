@@ -12,6 +12,8 @@ Requisitos: Node.js 24 e PostgreSQL. Copie `.env.example` para `.env` e configur
 
 Para cadastrar uma filial, defina `FILIAL_ID`, `FILIAL_NOME` e `FILIAL_TOKEN` no ambiente e execute `npm run cadastrar`. Gere um token aleatório com pelo menos 32 caracteres e mantenha-o fora do repositório. O banco guarda somente seu hash. A rota `POST /filiais/{id}/batimentos` recebe `Authorization: Bearer <token>` e JSON com `cpu`, `memoria`, `disco` (percentuais de 0 a 100), `latencia` (ms) e `servicos` (objeto de nomes para booleanos). Um batimento válido retorna 202; token inválido retorna 401 e é registrado sem o token. Campos inválidos retornam 422. O servidor usa o horário de recebimento e verifica filiais a cada 15 segundos.
 
+A manutenção roda na inicialização e a cada hora: batimentos com mais de 30 dias são resumidos por hora UTC e removidos em uma transação, preservando o último batimento de cada filial. Registros de acesso inválido expiram após 30 dias; tentativas para filiais inexistentes compartilham no máximo um registro por hora.
+
 Execute `npm test` para testes com banco PGlite e `npm run typecheck` para tipos. PostgreSQL real ainda precisa ser verificado localmente. Use HTTPS e restrinja acesso à API em uma implantação; esta etapa não implementa autenticação para consulta ou limitação distribuída de requisições.
 
 ## O que é

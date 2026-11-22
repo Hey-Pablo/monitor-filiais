@@ -23,3 +23,16 @@ test('ingestão autentica, registra rejeição e abre e fecha incidentes sem dup
   assert.equal((await db.query('SELECT * FROM incidentes WHERE fechado_em IS NULL')).rows.length, 0);
   await db.close();
 });
+
+test('filiais inexistentes compartilham um registro de rejeição por hora', async () => {
+  const db = new PGlite();
+  try {
+    await db.exec(await readFile('api/schema.sql', 'utf8'));
+    const monitor = criarMonitor(db);
+    const dados = { cpu: 20, memoria: 40, disco: 50, servicos: {}, latencia: 1 };
+    for (let i = 0; i < 10; i++) assert.equal(await monitor.receber(`inexistente${i}`, 'x', dados), false);
+    const registros = await db.query('SELECT filial_id FROM acessos_invalidos');
+    assert.equal(registros.rows.length, 1);
+    assert.equal(registros.rows[0].filial_id, null);
+  } finally { await db.close(); }
+});
