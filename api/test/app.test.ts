@@ -19,3 +19,16 @@ test('HTTP valida corpo e recusa token inválido', async () => {
     assert.equal(chamadas, 2);
   } finally { servidor.close(); }
 });
+
+test('rota de disponibilidade valida mês e retorna 404 para filial ausente', async () => {
+  const app = criarApp({ async receber() { return true; } }, { async query() { return { rows: [] }; } });
+  const servidor = app.listen(0);
+  await new Promise<void>(resolve => servidor.once('listening', resolve));
+  const endereco = servidor.address();
+  if (!endereco || typeof endereco === 'string') throw new Error('endereço indisponível');
+  try {
+    const base = `http://127.0.0.1:${endereco.port}/filiais/f1/disponibilidade`;
+    assert.equal((await fetch(`${base}?mes=2026-13`)).status,400);
+    assert.equal((await fetch(`${base}?mes=2026-02`)).status,404);
+  } finally { servidor.close(); }
+});

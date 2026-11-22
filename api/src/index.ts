@@ -43,6 +43,7 @@ async function iniciar() {
     await despachar();
     setInterval(despachar, 15_000);
   }
-  criarApp(monitor).listen(Number(process.env.PORT ?? 3000));
+  const consultas = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
+  criarApp(monitor, consultas).listen(Number(process.env.PORT ?? 3000));
 }
 iniciar().catch(() => { console.error('Falha ao iniciar API'); process.exitCode = 1; });
