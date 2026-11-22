@@ -4,8 +4,9 @@ import { PGlite } from '@electric-sql/pglite';
 import { readFile } from 'node:fs/promises';
 import { criarMonitor, hashToken } from '../src/monitor';
 
-test('ingestão autentica, registra rejeição e abre e fecha incidentes sem duplicar', async () => {
+test('ingestão autentica, registra rejeição e abre e fecha incidentes sem duplicar', async t => {
   const db = new PGlite();
+  t.after(() => db.close());
   await db.exec(await readFile('api/schema.sql', 'utf8'));
   await db.query('INSERT INTO filiais (id,nome,token_hash) VALUES ($1,$2,$3)', ['f1','Filial fictícia',hashToken('segredo-de-teste')]);
   let agora = new Date('2026-01-01T12:00:00Z');
@@ -21,7 +22,6 @@ test('ingestão autentica, registra rejeição e abre e fecha incidentes sem dup
   assert.equal((await db.query('SELECT * FROM incidentes WHERE fechado_em IS NULL')).rows.length, 3);
   await monitor.receber('f1', 'segredo-de-teste', { ...dados, disco: 20, servicos: { ERP: true } });
   assert.equal((await db.query('SELECT * FROM incidentes WHERE fechado_em IS NULL')).rows.length, 0);
-  await db.close();
 });
 
 test('filiais inexistentes compartilham um registro de rejeição por hora', async () => {
