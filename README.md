@@ -2,7 +2,7 @@
 
 > **Demonstração:** em breve
 
-> **Status: em desenvolvimento.** O código entra aos poucos; abaixo está o planejamento do projeto.
+> **Status: em desenvolvimento.** Prontos: agente PowerShell, simulador de 50 filiais e primeira etapa da API (ingestão e incidentes). Faltam: notificações no Telegram, disponibilidade mensal, retenção e painel em tempo real.
 
 ## API: primeira etapa
 
@@ -81,3 +81,8 @@ monitor-filiais/
 ## Autor
 
 Pablo Dilio · [Portfólio](https://hey-pablo.github.io/pablo-dilio-portfolio/) · [LinkedIn](https://www.linkedin.com/in/pablo-dilio-4063991b2)
+## O que o Pablo precisa testar no PC
+
+- Agente no Windows 10/11 com PowerShell 5.1: `Enviar-Batimento.ps1` real e `Instalar-Tarefa.ps1` (`Register-ScheduledTask`), com serviços reais.
+- API contra PostgreSQL real (os testes usam PGlite).
+- Simulador apontando para a API em execução.
