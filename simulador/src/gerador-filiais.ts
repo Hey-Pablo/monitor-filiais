@@ -46,7 +46,7 @@ function gerarFalhasAleatorias(filialId: string): FalhaProgramada[] {
     const fim = new Date(agora.getTime() + (inicioMin + duracao) * 60000).toISOString();
 
     const falha: FalhaProgramada = {
-      tipo: tipoFalha,
+      tipo: tipoFalha as FalhaProgramada['tipo'],
       inicio,
       fim
     };
@@ -63,7 +63,7 @@ function gerarFalhasAleatorias(filialId: string): FalhaProgramada[] {
         break;
       case 'servico':
         falha.servicoNome = SERVICOS_WINDOWS[Math.floor(Math.random() * SERVICOS_WINDOWS.length)];
-        falha.servicoStatus = ['stopped', 'paused', 'unknown'][Math.floor(Math.random() * 3)] as any;
+        falha.servicoStatus = ['stopped', 'paused', 'unknown'][Math.floor(Math.random() * 3)] as 'stopped' | 'paused' | 'unknown';
         break;
       case 'offline':
         // offline não precisa de parâmetros extras - o simulador para de enviar
@@ -122,7 +122,7 @@ export function obterMetricasFilial(
   let discoLivre = metricasBase.discoLivre;
   let offline = false;
 
-  const servicos = servicosPadrao.map(nome => ({ nome, status: 'running' as const }));
+  const servicos = servicosPadrao.map(nome => ({ nome, status: 'running' as 'running' | 'stopped' | 'paused' | 'unknown' }));
 
   // Verifica falhas programadas ativas
   if (filial.falhas) {
@@ -156,5 +156,5 @@ export function obterMetricasFilial(
     }
   }
 
-  return { cpu, memoria, discoLivre, servicos, offline };
+  return { cpu, memoria, discoLivre, servicos: servicos as Array<{nome: string; status: 'running' | 'stopped' | 'paused' | 'unknown'}>, offline };
 }

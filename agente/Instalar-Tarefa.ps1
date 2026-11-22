@@ -70,7 +70,7 @@ if ($Remover) {
     if ($PSCmdlet.ShouldProcess($TaskName, 'Remover tarefa agendada')) {
         try {
             Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction Stop
-            Write-Host "Tarefa '$TaskName' removida com sucesso."
+            Write-Output "Tarefa '$TaskName' removida com sucesso."
         } catch {
             Write-Error "Falha ao remover tarefa: $_"
             exit 1
@@ -97,12 +97,12 @@ $principal = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccou
 if ($PSCmdlet.ShouldProcess($TaskName, 'Registrar tarefa agendada')) {
     try {
         Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Settings $settings -Principal $principal -Description $Descricao -Force -ErrorAction Stop
-        Write-Host "Tarefa '$TaskName' registrada/atualizada com sucesso."
-        Write-Host "A tarefa será executada a cada 60 segundos usando a conta SYSTEM."
-        Write-Host ""
-        Write-Host "Para verificar: Get-ScheduledTask -TaskName '$TaskName'"
-        Write-Host "Para ver histórico: Get-ScheduledTaskInfo -TaskName '$TaskName'"
-        Write-Host "Para remover: .\Instalar-Tarefa.ps1 -Remover"
+        Write-Output "Tarefa '$TaskName' registrada/atualizada com sucesso."
+        Write-Output "A tarefa será executada a cada 60 segundos usando a conta SYSTEM."
+        Write-Output ""
+        Write-Output "Para verificar: Get-ScheduledTask -TaskName '$TaskName'"
+        Write-Output "Para ver histórico: Get-ScheduledTaskInfo -TaskName '$TaskName'"
+        Write-Output "Para remover: .\Instalar-Tarefa.ps1 -Remover"
     } catch {
         Write-Error "Falha ao registrar tarefa: $_"
         exit 1

@@ -159,7 +159,7 @@ function Get-DiscoSistema {
     }
 }
 
-function Get-StatusServicos {
+function Get-StatusServico {
     <#
     .SYNOPSIS
     Obtém o status de uma lista de serviços.
@@ -167,7 +167,7 @@ function Get-StatusServicos {
     .PARAMETER Nomes
     Array com os nomes dos serviços a verificar.
     .EXAMPLE
-    Get-StatusServicos -Nomes @('spooler', 'wuauserv')
+    Get-StatusServico -Nomes @('spooler', 'wuauserv')
     # Resultado: @(@{ nome='spooler'; status='running' }, @{ nome='wuauserv'; status='stopped' })
     #>
     [CmdletBinding()]
@@ -241,5 +241,5 @@ Export-ModuleMember -Function `
     Get-UsoCpu, `
     Get-UsoMemoria, `
     Get-DiscoSistema, `
-    Get-StatusServicos, `
+    Get-StatusServico, `
     ConverterParaJsonContrato

@@ -80,7 +80,7 @@ async function executarCiclo(config: SimuladorConfig, tempoDecorridoMs: number):
       cpu,
       memoria,
       discoLivrePercentual: discoLivre,
-      servicos: servicos.map(s => ({ nome: s.nome, status: s.status })),
+      servicos: servicos.map(s => ({ nome: s.nome, status: s.status as 'running' | 'stopped' | 'paused' | 'unknown' })),
       latenciaMs: 0 // será preenchido pela função de envio
     };
 

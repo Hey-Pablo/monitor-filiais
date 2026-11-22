@@ -71,10 +71,10 @@ function Enviar-Batimento {
 
     try {
         $inicio = Get-Date
-        $response = Invoke-RestMethod -Uri $url -Method Post -Headers $headers -Body $payload -TimeoutSec $TimeoutSegundos -ErrorAction Stop
+        Invoke-RestMethod -Uri $url -Method Post -Headers $headers -Body $payload -TimeoutSec $TimeoutSegundos -ErrorAction Stop | Out-Null
         $fim = Get-Date
         $latencia = [math]::Round(($fim - $inicio).TotalMilliseconds)
-        Write-Host "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] Batimento enviado - Status: OK - Latência: ${latencia}ms"
+        Write-Output "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] Batimento enviado - Status: OK - Latência: ${latencia}ms"
         return $true
     } catch {
         $fim = Get-Date
@@ -92,7 +92,7 @@ function ColetarMetricas {
     $cpu = Get-UsoCpu
     $memoria = Get-UsoMemoria
     $disco = Get-DiscoSistema
-    $servicos = Get-StatusServicos -Nomes $ServicosMonitorados
+    $servicos = Get-StatusServico -Nomes $ServicosMonitorados
 
     return [pscustomobject]@{
         Cpu                  = $cpu
@@ -123,12 +123,12 @@ if (-not $apiBaseUrl -or -not $filialId -or -not $token) {
     exit 1
 }
 
-Write-Host "=== Agente Monitor Filial ==="
-Write-Host "Filial: $filialId"
-Write-Host "API: $apiBaseUrl"
-Write-Host "Intervalo: ${intervaloSegundos}s"
-Write-Host "Serviços monitorados: $($servicosMonitorados -join ', ')"
-Write-Host ""
+Write-Output "=== Agente Monitor Filial ==="
+Write-Output "Filial: $filialId"
+Write-Output "API: $apiBaseUrl"
+Write-Output "Intervalo: ${intervaloSegundos}s"
+Write-Output "Serviços monitorados: $($servicosMonitorados -join ', ')"
+Write-Output ""
 
 if ($UmaVez) {
     $metricas = ColetarMetricas -ServicosMonitorados $servicosMonitorados
