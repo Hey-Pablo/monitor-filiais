@@ -1,0 +1,11 @@
+FROM node:24-alpine AS build
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --ignore-scripts
+COPY painel ./painel
+RUN npm run build:painel
+
+FROM nginx:alpine
+COPY infra/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/painel/dist /usr/share/nginx/html
+EXPOSE 80
