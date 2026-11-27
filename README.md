@@ -2,7 +2,7 @@
 
 > **Demonstração:** em breve
 
-> **Status: em desenvolvimento.** API, painel, agente e simulador estão implementados. Docker, PostgreSQL e Windows precisam de testes no PC.
+> **Status: concluído.** API, painel, agente, simulador e CI estão na `main`, com testes automatizados (17 da API com PGlite e 21 do agente com Pester). Docker Compose, PostgreSQL real e o agente no Windows ainda não foram testados: ver "Executar com Docker Compose" e "Agente Windows e simulador".
 
 ## API: primeira etapa
 
