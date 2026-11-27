@@ -2,7 +2,7 @@
 
 > **Demonstração:** em breve
 
-> **Status: em desenvolvimento.** API, painel, agente e simulador estão implementados. Docker, PostgreSQL e Windows precisam de testes no PC.
+> **Status: pronto para uso.** API, painel, agente e simulador estão implementados e testados no Linux (testes automatizados e CI). Docker, PostgreSQL real e o agente no Windows ainda precisam de teste no PC.
 
 ## API: primeira etapa
 
