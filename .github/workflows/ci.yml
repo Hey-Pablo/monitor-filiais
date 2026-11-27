@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  api-painel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run typecheck:painel
+      - run: npm test
+      - run: npm run build:painel
+
+  agente:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: PSScriptAnalyzer (falha só em erros)
+        shell: pwsh
+        run: |
+          $erros = Invoke-ScriptAnalyzer -Path agente -Recurse -Settings agente/PSScriptAnalyzerSettings.psd1 -Severity Error
+          $erros | Format-Table -AutoSize
+          if ($erros) { exit 1 }
+      - name: Pester
+        shell: pwsh
+        run: Invoke-Pester agente/tests -CI

@@ -1,7 +1,7 @@
 {
   "name": "monitor-filiais",
   "version": "1.0.0",
-  "description": "> **Status: em desenvolvimento.** O código entra aos poucos; abaixo está o planejamento do projeto.",
+  "description": "Monitor de filiais: API, painel, agente PowerShell e simulador.",
   "main": "index.js",
   "scripts": {
     "test": "tsx --test api/test/*.test.ts",
